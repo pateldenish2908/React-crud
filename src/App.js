@@ -1,75 +1,66 @@
-// Importing Components
+import React, {useEffect, useState} from 'react';
 import Header from './components/Header';
-import Tasks from './components/Tasks';
-import AddTask from './components/AddTask';
-// Importing React Hooks
-import { useState, useEffect } from 'react';
-// Importing Packages
-import { v4 as uuidv4 } from 'uuid';
-import Swal from "sweetalert2";
+import Users from './components/Users';
+import AddUser from './components/AddUser';
+
+import HttpService from './services/HttpService';
 
 function App() {
     // All States
     const [loading, setloading] = useState(true); // Pre-loader before page renders
-    const [tasks, setTasks] = useState([]); // Task State
-    const [showAddTask, setShowAddTask] = useState(false); // To reveal add task form
+    const [users, setUsers] = useState([]); // User State
+    const [showAddUser, setShowAddUser] = useState(false); // To reveal add user form
 
     // Pre-loader
+    const preLoaderStop = () => {
+        setloading(false);
+    };
+
+	// useEffect(() => {
+       
+	// 	setUsers(...users,[]);
+    //     // eslint-disable-next-line
+    // }, [])
+
+
     useEffect(() => {
-        setTimeout(() => {
-            setloading(false);
-        }, 3500);
+		console.log("useEffect");
+		// Fetching 
+		HttpService.getAll().then((res) => {
+			if (res.data.users.length == 0) {
+				setUsers([])
+			} else {
+				setUsers(res.data.users);
+			}
+			preLoaderStop();
+		});
+
+
     }, [])
 
-    // Fetching from Local Storage
-    const getTasks = JSON.parse(localStorage.getItem("taskAdded"));
-
-    useEffect(() => {
-        if (getTasks == null) {
-            setTasks([])
-        } else {
-            setTasks(getTasks);
-        }
-        // eslint-disable-next-line
-    }, [])
-
-    // Add Task
-    const addTask = (task) => {
-        const id = uuidv4();
-        const newTask = { id, ...task }
-
-        setTasks([...tasks, newTask]);
-
-        Swal.fire({
-            icon: 'success',
-            title: 'Yay...',
-            text: 'You have successfully added a new task!'
-        })
-
-        localStorage.setItem("taskAdded", JSON.stringify([...tasks, newTask]));
+    // Add User
+    const addUser = (user) => {
+        HttpService.create(user).then((res) => {
+			preLoaderStop();
+            alert('You have successfully added a new user!');
+		});
     }
 
-    // Delete Task
-    const deleteTask = (id) => {
-        const deleteTask = tasks.filter((task) => task.id !== id);
-
-        setTasks(deleteTask);
-
-        Swal.fire({
-            icon: 'success',
-            title: 'Oops...',
-            text: 'You have successfully deleted a task!'
-        })
-
-        localStorage.setItem("taskAdded", JSON.stringify(deleteTask));
+    // Delete User
+    const deleteUser = (id) => {
+        
+        HttpService.delete(id).then((res) => {
+			preLoaderStop();
+            alert('You have successfully deleted a user!');
+		});
     }
 
-    // Edit Task
-    const editTask = (id) => {
+    // Edit User
+    const editUser = (id) => {
 
-        const text = prompt("Task Name");
+        const text = prompt("User Name");
         const day = prompt("Day and Time");
-        let data = JSON.parse(localStorage.getItem('taskAdded'));
+        let data = JSON.parse(localStorage.getItem('userAdded'));
 
         const myData = data.map(x => {
             if (x.id === id) {
@@ -77,19 +68,15 @@ function App() {
                     ...x,
                     text: text,
                     day: day,
-                    id: uuidv4()
+                    id: Math.floor((Math.random() * 10000000000) + 1)
                 }
             }
             return x;
         })
+alert('You have successfully edited an existing user!');
+        
 
-        Swal.fire({
-            icon: 'success',
-            title: 'Yay...',
-            text: 'You have successfully edited an existing task!'
-        })
-
-        localStorage.setItem("taskAdded", JSON.stringify(myData));
+        localStorage.setItem("userAdded", JSON.stringify(myData));
         window.location.reload();
     }
 
@@ -118,21 +105,21 @@ function App() {
                     :
                     <div className="container">
                         {/* App Header that has open and App Name */}
-                        <Header showForm={() => setShowAddTask(!showAddTask)} changeTextAndColor={showAddTask} />
+                        <Header showForm={() => setShowAddUser(!showAddUser)} changeTextAndColor={showAddUser} />
 
-                        {/* Revealing of Add Task Form */}
-                        {showAddTask && <AddTask onSave={addTask} />}
+                        {/* Revealing of Add User Form */}
+                        {showAddUser && <AddUser onSave={addUser} />}
 
-                        {/* Task Counter */}
-                        <h3>Number of Tasks: {tasks.length}</h3>
+                        {/* User Counter */}
+                        <h3>Number of Users: {users.length}</h3>
 
-                        {/* Displaying of Tasks */}
+                        {/* Displaying of Users */}
                         {
-                            tasks.length > 0
+                            users.length > 0
                                 ?
-                                (<Tasks tasks={tasks} onDelete={deleteTask} onEdit={editTask} />)
+                                (<Users users={users} onDelete={deleteUser} onEdit={editUser} />)
                                 :
-                                ('No Task Found!')
+                                ('No User Found!')
                         }
                     </div>
             }

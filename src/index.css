@@ -33,10 +33,10 @@ body {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 1100px;
   margin: 30px auto;
   overflow: auto;
-  min-height: 300px;
+  min-height: 500px;
   padding: 30px;
   border-radius: 5px;
   background-color: #ccc;
@@ -166,4 +166,10 @@ body {
     margin: 250px auto 0 auto;
     max-width: 50%;
   }
+}
+.avatar {
+  vertical-align: middle;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
 }
